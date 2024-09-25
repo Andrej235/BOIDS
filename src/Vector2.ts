@@ -19,6 +19,20 @@ export class Vector2 {
     return this;
   }
 
+  remapToPositive(fromMax: Vector2) {
+    this.x = this.x + fromMax.x / 2;
+    this.y = this.y + fromMax.y / 2;
+    return this;
+  }
+
+  truncate(max: number) {
+    const magnitude = this.getMagnitude();
+
+    if (magnitude > max) this.divide(magnitude).multiply(max);
+
+    return this;
+  }
+
   copy() {
     return new Vector2(this.x, this.y);
   }
