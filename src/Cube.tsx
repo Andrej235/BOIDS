@@ -58,7 +58,23 @@ export default function Cube() {
     cubeRef.current.position.set(newPosition.x, newPosition.y, 0);
   });
 
+  const CIRCLE_RADIUS = 1;
+  const CIRCLE_DISTANCE = 2;
+  const ANGLE_CHANGE = 0.2;
+  const wanderAngle = useRef(0);
+
+  function setAngle(vector: Vector2, value: number): void {
+    const len = vector.getMagnitude();
+    vector.x = Math.cos(value) * len;
+    vector.y = Math.sin(value) * len;
+  }
+
   function getPosition(position: Vector2, target: Vector2): Vector2 {
+    return wander(position);
+  }
+
+  //@ts-ignore
+  function arrival(position: Vector2, target: Vector2) {
     let desiredVelocity = target.subtract(position);
     const distance = desiredVelocity.getMagnitude();
 
@@ -72,6 +88,25 @@ export default function Cube() {
     else desiredVelocity = desiredVelocity.normalize().multiply(maxVelocity);
 
     let steering = desiredVelocity.subtract(velocity.current);
+    steering = steering.truncate(maxForce);
+
+    velocity.current = velocity.current.add(steering).truncate(maxSpeed);
+    return position.add(velocity.current);
+  }
+
+  //@ts-ignore
+  function wander(position: Vector2) {
+    const circleCenter = velocity.current
+      .copy()
+      .normalize()
+      .multiply(CIRCLE_DISTANCE);
+
+    const displacement = new Vector2(0, -1).multiply(CIRCLE_RADIUS);
+
+    setAngle(displacement, wanderAngle.current);
+    wanderAngle.current += Math.random() * ANGLE_CHANGE - ANGLE_CHANGE * 0.5;
+
+    let steering = circleCenter.add(displacement);
     steering = steering.truncate(maxForce);
 
     velocity.current = velocity.current.add(steering).truncate(maxSpeed);
