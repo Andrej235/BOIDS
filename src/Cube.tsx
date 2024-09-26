@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Mesh } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Vector2 } from "./Vector2";
+import Vector2 from "./ClassDefinitions/Vector2";
 
 export default function Cube() {
   const maxVelocity = useMemo(() => 1, []);

@@ -1,13 +1,10 @@
-import { Canvas } from "@react-three/fiber";
 import "./App.scss";
-import Cube from "./Cube";
+import BoidController from "./Components/BoidController/BoidController";
 
 function App() {
   return (
     <div className="page-container">
-      <Canvas color="#000">
-        <Cube />
-      </Canvas>
+      <BoidController />
     </div>
   );
 }

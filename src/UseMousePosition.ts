@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Vector2 } from "./Vector2";
+import Vector2 from "./ClassDefinitions/Vector2";
 
 const useMousePosition = () => {
   const [mousePosition, setMousePosition] = useState<Vector2>(
