@@ -16,6 +16,6 @@ export default class Boid {
       ) + " deg"
     );
 
-    return Math.atan2(this.forward.y, this.forward.x);
+    return Math.atan2(this.forward.y, this.forward.x) + Math.PI ;
   }
 }
