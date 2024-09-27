@@ -10,6 +10,7 @@ function App() {
       <BoidController
         initialBoids={[
           new Boid(new Vector2(2, 0), new Vector2(1, 0)),
+          new Boid(new Vector2(1, 0.1), new Vector2(0, 1)),
           new Boid(new Vector2(0, 0), new Vector2(-0.1, 0)),
           new Boid(new Vector2(11, 1), new Vector2(-0.1543, 0.657)),
           new Boid(new Vector2(0, 0), new Vector2(0.465, -0.1423)),

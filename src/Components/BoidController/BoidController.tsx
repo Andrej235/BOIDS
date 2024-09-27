@@ -113,7 +113,7 @@ function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
   ): Obstacle | null {
     let mostThreatening: Obstacle | null = null;
 
-    obstacles.forEach((obstacle) => {
+    [...obstacles, ...boids.filter((b) => b !== boid)].forEach((obstacle) => {
       const collision = lineIntersectsCircle(
         ahead,
         ahead2,

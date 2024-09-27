@@ -15,7 +15,7 @@ export default function ObstacleRenderer({ obstacle }: ObstacleRendererProps) {
       ]}
     >
       <sphereGeometry />
-      <meshBasicMaterial color={"#fff"} />
+      <meshBasicMaterial color={"#555"} />
     </mesh>
   );
 }
