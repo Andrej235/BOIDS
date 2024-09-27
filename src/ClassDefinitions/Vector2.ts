@@ -83,4 +83,10 @@ export default class Vector2 {
     this.y /= length ? length : 1;
     return this;
   }
+
+  getDistanceTo(other: Vector2): number {
+    return Math.sqrt(
+      Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2)
+    );
+  }
 }
