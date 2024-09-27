@@ -60,6 +60,9 @@ function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
   const MAX_COHESION_DISTANCE = 1;
   const MAX_COHESION_FORCE = 0.001;
 
+  const MAX_EDGE_DISTANCE = 2;
+  const MAX_EDGE_FORCE = 21;
+
   useFrame(() => {
     setBoids((boids) => {
       boids.forEach((boid) => {
@@ -70,6 +73,7 @@ function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
         // steering.add(getCollectiveAvoidanceForce(boid));
         steering.add(getAlignmentForce(boid));
         steering.add(getCohesionForce(boid));
+        steering.add(getEdgeAvoidanceForce(boid));
 
         steering.truncate(MAX_STEERING_FORCE);
 
@@ -216,6 +220,27 @@ function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
     steering.divide(boids.length);
     steering.subtract(boid.position);
     return steering.normalize().multiply(MAX_COHESION_FORCE);
+  }
+
+  function getEdgeAvoidanceForce(boid: Boid): Vector2 {
+    const steering = new Vector2(0, 0);
+
+    const velocity = boid.velocity;
+    const ahead = boid.position
+      .copy()
+      .add(velocity.copy().multiply(MAX_SEE_AHEAD));
+
+    if (ahead.x < -viewportWidth / 2 + MAX_EDGE_DISTANCE)
+      steering.x = viewportWidth / 2;
+    else if (ahead.x > viewportWidth / 2 - MAX_EDGE_DISTANCE)
+      steering.x = -viewportWidth / 2;
+
+    if (ahead.y < -viewportHeight / 2 + MAX_EDGE_DISTANCE)
+      steering.y = viewportHeight / 2;
+    else if (ahead.y > viewportHeight / 2 - MAX_EDGE_DISTANCE)
+      steering.y = -viewportHeight / 2;
+
+    return steering.normalize().multiply(MAX_EDGE_FORCE);
   }
 
   function validatePosition(boid: Boid) {
