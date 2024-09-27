@@ -41,7 +41,9 @@ export default class Vector2 {
     return Math.sqrt(this.x * this.x + this.y * this.y);
   }
 
-  add(other: Vector2) {
+  add(other: Vector2 | null) {
+    if (!other) return this;
+
     this.x += other.x;
     this.y += other.y;
     return this;
