@@ -23,8 +23,9 @@ function App() {
         ]}
         obstacles={[
           new Obstacle(new Vector2(0, 0.5), 1),
-          new Obstacle(new Vector2(-1, 0.1), 0.5),
-          new Obstacle(new Vector2(3, -1.5), 1.3),
+          new Obstacle(new Vector2(-1, 0.1), 1.3),
+          new Obstacle(new Vector2(-1, -1), 1.3),
+          new Obstacle(new Vector2(3, -1.5), 1.2),
         ]}
       />
     </div>

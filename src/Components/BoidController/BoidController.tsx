@@ -42,10 +42,10 @@ function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
     viewport: { width: viewportWidth, height: viewportHeight },
   } = useThree();
 
-  const MAX_STEERING_FORCE = 0.003;
+  const MAX_STEERING_FORCE = 0.005;
   const MAX_SPEED = 0.05;
   const MAX_SEE_AHEAD = 8;
-  const MAX_AVOID_FORCE = 0.75;
+  const MAX_AVOID_FORCE = 0.00275;
 
   useFrame(() => {
     setBoids((boids) => {
@@ -87,7 +87,20 @@ function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
         ahead.y - mostThreatening.position.y
       );
 
-      avoidance.normalize().multiply(MAX_AVOID_FORCE);
+      const distance = boid.position.getDistanceTo(mostThreatening.position);
+      const dynamicAvoidanceForceMultiplier =
+        (mostThreatening.radius * 0.9) / distance;
+      // distance < mostThreatening.radius * 0.9 ? 2 : 1;
+
+      console.log(dynamicAvoidanceForceMultiplier);
+
+      avoidance
+        .normalize()
+        .multiply(
+          MAX_AVOID_FORCE * dynamicAvoidanceForceMultiplier < 0.9
+            ? 0.9
+            : dynamicAvoidanceForceMultiplier
+        );
     }
 
     return avoidance;
