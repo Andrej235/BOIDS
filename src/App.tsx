@@ -20,7 +20,11 @@ function App() {
           // new Boid(new Vector2(0, 0), new Vector2(-0.54, -0.543)),
           // new Boid(new Vector2(0, 0), new Vector2(-0.12, -0.654)),
         ]}
-        obstacles={[new Obstacle(new Vector2(0, 0), 1)]}
+        obstacles={[
+          new Obstacle(new Vector2(0, 0.5), 1),
+          // new Obstacle(new Vector2(3, -1.5), 0.5),
+          // new Obstacle(new Vector2(-1, 0), 1.3),
+        ]}
       />
     </div>
   );

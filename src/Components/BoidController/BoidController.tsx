@@ -51,6 +51,8 @@ export default function BoidController({
           <sphereGeometry />
           <meshBasicMaterial color={"#fff"} />
         </mesh>
+
+        <axesHelper scale={50} />
       </Canvas>
     </div>
   );
@@ -67,6 +69,8 @@ function InnerBoidController({
     viewport: { width: viewportWidth, height: viewportHeight },
   } = useThree();
 
+  const viewportScale = new Vector2(viewportWidth, viewportHeight);
+
   const MAX_STEERING_FORCE = 0.003;
   const MAX_SPEED = 0.05;
   const MAX_SEE_AHEAD = 6;
@@ -77,12 +81,10 @@ function InnerBoidController({
       boids.forEach((boid) => {
         const velocity = boid.velocity;
 
-        const steering = getAvoidanceForce(boid)
-          ? testSteering!
-          : new Vector2(0, 0);
+        const steering = getAvoidanceForce(boid) ?? new Vector2(0, 0);
         steering.truncate(MAX_STEERING_FORCE);
 
-        velocity.add(steering).truncate(MAX_SPEED);
+        velocity.add(steering).normalize().truncate(MAX_SPEED); //Normalizing guarantees a velocity of a same magnitude regardless of direction and steering direction
         boid.position.add(velocity);
 
         validatePosition(boid);
