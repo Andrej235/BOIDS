@@ -17,40 +17,17 @@ export default function BoidController({
   initialBoids,
   obstacles,
 }: BoidControllerProps) {
-  const [a, setA] = useState<Vector2 | undefined>(new Vector2(0, 0));
-
   return (
     <div className="boid-controller">
       <Canvas color="#000">
         <InnerBoidController
           initialBoids={initialBoids}
           obstacles={obstacles}
-          testSteering={a}
         />
 
         {obstacles.map((obstacle, i) => (
           <ObstacleRenderer key={i} obstacle={obstacle} />
         ))}
-
-        <mesh
-          position={[-1, 3, 0]}
-          scale={[0.3, 0.3, 0.3]}
-          onClick={() =>
-            void setA(a?.y ? new Vector2(1, 0) : new Vector2(0, 0.7))
-          }
-        >
-          <sphereGeometry />
-          <meshBasicMaterial color={"#fff"} />
-        </mesh>
-
-        <mesh
-          position={[1, 3, 0]}
-          scale={[0.3, 0.3, 0.3]}
-          onClick={() => void setA(undefined)}
-        >
-          <sphereGeometry />
-          <meshBasicMaterial color={"#fff"} />
-        </mesh>
 
         <axesHelper scale={50} />
       </Canvas>
@@ -58,23 +35,17 @@ export default function BoidController({
   );
 }
 
-function InnerBoidController({
-  initialBoids,
-  obstacles,
-  testSteering,
-}: BoidControllerProps) {
+function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
   const [boids, setBoids] = useState<Boid[]>([]);
   useEffect(() => void setBoids(initialBoids), [initialBoids]);
   const {
     viewport: { width: viewportWidth, height: viewportHeight },
   } = useThree();
 
-  const viewportScale = new Vector2(viewportWidth, viewportHeight);
-
   const MAX_STEERING_FORCE = 0.003;
   const MAX_SPEED = 0.05;
-  const MAX_SEE_AHEAD = 6;
-  const MAX_AVOID_FORCE = 0.5;
+  const MAX_SEE_AHEAD = 8;
+  const MAX_AVOID_FORCE = 0.75;
 
   useFrame(() => {
     setBoids((boids) => {
@@ -84,7 +55,8 @@ function InnerBoidController({
         const steering = getAvoidanceForce(boid) ?? new Vector2(0, 0);
         steering.truncate(MAX_STEERING_FORCE);
 
-        velocity.add(steering).normalize().truncate(MAX_SPEED); //Normalizing guarantees a velocity of a same magnitude regardless of direction and steering direction
+        //Normalizing guarantees a velocity of a same magnitude regardless of direction and steering direction. This is necessary because steering and velocity could have opposite signs i.e. the scene allows negative values
+        velocity.add(steering).normalize().truncate(MAX_SPEED);
         boid.position.add(velocity);
 
         validatePosition(boid);
@@ -96,6 +68,7 @@ function InnerBoidController({
 
   function getAvoidanceForce(boid: Boid): Vector2 | null {
     const velocity = boid.velocity;
+
     const ahead = boid.position
       .copy()
       .add(velocity.copy().multiply(MAX_SEE_AHEAD));
@@ -104,27 +77,60 @@ function InnerBoidController({
       .copy()
       .add(velocity.copy().multiply(MAX_SEE_AHEAD / 2));
 
-    const mostThreatening =
-      obstacles[0].position.getDistanceTo(ahead) < obstacles[0].radius ||
-      obstacles[0].position.getDistanceTo(ahead2) < obstacles[0].radius
-        ? obstacles[0]
-        : null; //TODO: find most threatening obstacle
+    const mostThreatening = findMostThreateningObstacle(boid, ahead, ahead2);
 
     let avoidance: Vector2 | null = null;
 
     if (mostThreatening) {
-      console.log(mostThreatening);
-
       avoidance = new Vector2(
         ahead.x - mostThreatening.position.x,
         ahead.y - mostThreatening.position.y
       );
 
       avoidance.normalize().multiply(MAX_AVOID_FORCE);
-      // console.log(boid.position, avoidance);
     }
 
     return avoidance;
+  }
+
+  function lineIntersectsCircle(
+    ahead: Vector2,
+    ahead2: Vector2,
+    ahead3: Vector2,
+    obstacle: Obstacle
+  ): boolean {
+    return (
+      obstacle.position.getDistanceTo(ahead) < obstacle.radius ||
+      obstacle.position.getDistanceTo(ahead2) < obstacle.radius ||
+      obstacle.position.getDistanceTo(ahead3) < obstacle.radius
+    );
+  }
+
+  function findMostThreateningObstacle(
+    boid: Boid,
+    ahead: Vector2,
+    ahead2: Vector2
+  ): Obstacle | null {
+    let mostThreatening: Obstacle | null = null;
+
+    obstacles.forEach((obstacle) => {
+      const collision = lineIntersectsCircle(
+        ahead,
+        ahead2,
+        boid.position,
+        obstacle
+      );
+
+      if (
+        collision &&
+        (mostThreatening == null ||
+          boid.position.getDistanceTo(obstacle.position) <
+            boid.position.getDistanceTo(mostThreatening.position))
+      )
+        mostThreatening = obstacle;
+    });
+
+    return mostThreatening;
   }
 
   function validatePosition(boid: Boid) {
