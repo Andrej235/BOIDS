@@ -19,7 +19,12 @@ export default function BoidController({
 }: BoidControllerProps) {
   return (
     <div className="boid-controller">
-      <Canvas color="#000">
+      <Canvas
+        color="#000"
+        camera={{
+          fov: 100,
+        }}
+      >
         <InnerBoidController
           initialBoids={initialBoids}
           obstacles={obstacles}
@@ -44,9 +49,16 @@ function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
 
   const MAX_STEERING_FORCE = 0.005;
   const MAX_SPEED = 0.05;
+
   const MAX_SEE_AHEAD = 8;
+  const MAX_AVOID_DISTANCE = 1.5;
   const MAX_AVOID_FORCE = 0.00275;
-  const MAX_ALIGNMENT_DISTANCE = 1.5;
+
+  const MAX_ALIGN_DISTANCE = 1;
+  const MAX_ALIGN_FORCE = 0.003;
+
+  const MAX_COHESION_DISTANCE = 1;
+  const MAX_COHESION_FORCE = 0.001;
 
   useFrame(() => {
     setBoids((boids) => {
@@ -55,7 +67,9 @@ function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
 
         const steering = new Vector2(0, 0);
         steering.add(getAvoidanceForce(boid));
+        // steering.add(getCollectiveAvoidanceForce(boid));
         steering.add(getAlignmentForce(boid));
+        steering.add(getCohesionForce(boid));
 
         steering.truncate(MAX_STEERING_FORCE);
 
@@ -148,6 +162,25 @@ function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
     }
   }
 
+  function getCollectiveAvoidanceForce(boid: Boid): Vector2 {
+    if (boids.length < 2) return new Vector2(0, 0);
+
+    const steering = new Vector2(0, 0);
+
+    boids.forEach((current) => {
+      if (current === boid) return;
+
+      if (current.position.getDistanceTo(boid.position) > MAX_AVOID_DISTANCE)
+        return;
+
+      steering.add(current.position.copy().subtract(boid.position));
+    });
+
+    steering.divide(boids.length);
+    steering.multiply(-1);
+    return steering.normalize().multiply(MAX_AVOID_FORCE);
+  }
+
   function getAlignmentForce(boid: Boid): Vector2 {
     if (boids.length < 2) return new Vector2(0, 0);
 
@@ -156,16 +189,33 @@ function InnerBoidController({ initialBoids, obstacles }: BoidControllerProps) {
     boids.forEach((current) => {
       if (current === boid) return;
 
-      if (
-        current.position.getDistanceTo(boid.position) > MAX_ALIGNMENT_DISTANCE
-      )
+      if (current.position.getDistanceTo(boid.position) > MAX_ALIGN_DISTANCE)
         return;
 
       steering.add(current.velocity);
     });
 
     steering.divide(boids.length);
-    return steering;
+    return steering.normalize().multiply(MAX_ALIGN_FORCE);
+  }
+
+  function getCohesionForce(boid: Boid): Vector2 {
+    if (boids.length < 2) return new Vector2(0, 0);
+
+    const steering = new Vector2(0, 0);
+
+    boids.forEach((current) => {
+      if (current === boid) return;
+
+      if (current.position.getDistanceTo(boid.position) > MAX_COHESION_DISTANCE)
+        return;
+
+      steering.add(current.position);
+    });
+
+    steering.divide(boids.length);
+    steering.subtract(boid.position);
+    return steering.normalize().multiply(MAX_COHESION_FORCE);
   }
 
   function validatePosition(boid: Boid) {

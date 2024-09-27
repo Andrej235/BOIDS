@@ -9,10 +9,10 @@ function App() {
   const boids = useMemo(() => {
     const boids: Boid[] = [];
 
-    for (let i: number = 0; i < Math.random() * 20 + 15; i++) {
+    for (let i: number = 0; i < 50; i++) {
       boids.push(
         new Boid(
-          new Vector2(Math.random() * 11, Math.random() * 6),
+          new Vector2(Math.random() * 25, Math.random() * 15),
           new Vector2(Math.random() - 0.5, Math.random() - 0.5)
         )
       );
