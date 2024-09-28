@@ -43,7 +43,9 @@ export default function BoidController({
           <ObstacleRenderer key={i} obstacle={obstacle} />
         ))}
 
-        <axesHelper scale={50} />
+        {/* <axesHelper scale={50} /> */}
+
+        {/* <OrbitControls /> */}
       </Canvas>
     </div>
   );
@@ -61,7 +63,7 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
   const viewportSize = new Vector2(viewportWidth, viewportHeight);
   const min = new Vector2(-viewportWidth / 2, -viewportHeight / 2);
   const max = new Vector2(viewportWidth / 2, viewportHeight / 2);
-  const cellSize = 4;
+  const cellSize = 2;
 
   const MAX_STEERING_FORCE = 0.005;
   const MAX_SPEED = 0.05;
@@ -267,6 +269,12 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
           selected={selectedBoids.includes(boid)}
         />
       ))}
+
+      <gridHelper
+        rotation-x={Math.PI / 2}
+        position-y={-(viewportWidth - viewportHeight) / 2}
+        args={[viewportWidth, viewportWidth / cellSize, 0xff0000, "teal"]}
+      />
     </>
   );
 }
