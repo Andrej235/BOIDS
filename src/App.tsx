@@ -8,7 +8,7 @@ function App() {
   const boids = useMemo(() => {
     const boids: Boid[] = [];
 
-    for (let i: number = 0; i < 750; i++) {
+    for (let i: number = 0; i < 50; i++) {
       boids.push(
         new Boid(
           new Vector2(Math.random() * 25, Math.random() * 15),
