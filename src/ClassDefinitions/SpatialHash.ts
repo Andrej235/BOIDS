@@ -58,4 +58,8 @@ export default class SpatialHash {
 
     return Array.from(new Set(bucket));
   }
+
+  getBucket(position: Vector2) {
+    return this.buckets.get(this.hash(position.x, position.y));
+  }
 }

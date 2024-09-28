@@ -66,10 +66,11 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
   const cellSize = 2;
 
   const MAX_STEERING_FORCE = 0.005;
-  const MAX_SPEED = 0.05;
+  const MAX_SPEED = 5;
 
-  //TODO: use delta time
-  useFrame(() => {
+  useFrame(({}, delta) => {
+    spatialHash.current = spatialHash.current.construct(boids);
+
     setBoids((boids) => {
       boids.forEach((boid) => {
         const velocity = boid.velocity;
@@ -93,7 +94,10 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
         steering.truncate(MAX_STEERING_FORCE);
 
         //Normalizing guarantees a velocity of a same magnitude regardless of direction and steering direction. This is necessary because steering and velocity could have opposite signs i.e. the scene allows negative values
-        velocity.add(steering).normalize().truncate(MAX_SPEED);
+        velocity
+          .add(steering)
+          .normalize()
+          .truncate(MAX_SPEED * delta);
         boid.position.add(velocity);
 
         validatePosition(boid);
@@ -104,10 +108,6 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
   });
 
   const spatialHash = useRef<SpatialHash>(new SpatialHash(min, max, cellSize));
-  useEffect(
-    () => void (spatialHash.current = spatialHash.current.construct(boids)),
-    [boids]
-  );
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -164,7 +164,10 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
 
     let mostThreatening: Obstacle | null = null;
 
-    for (const current of boids) {
+    const inProximity = spatialHash.current.getInProximity(boid.position);
+    if (inProximity.length < 2) return {} as any;
+
+    for (const current of inProximity) {
       if (current === boid) continue;
 
       const distance = current.position.getDistanceTo(boid.position);
@@ -177,6 +180,12 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
 
       if (types.includes("cohesion") && distance < MAX_COHESION_DISTANCE)
         forces.cohesion.add(current.position);
+    }
+
+    for (const current of spatialHash.current.getBucket(boid.position) ?? []) {
+      if (current === boid) continue;
+
+      const distance = current.position.getDistanceTo(boid.position);
 
       if (types.includes("avoidance")) {
         const collision = lineIntersectsCircle(
@@ -195,15 +204,18 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
       }
     }
 
-    forces.alignment.divide(boids.length).normalize().multiply(MAX_ALIGN_FORCE);
+    forces.alignment
+      .divide(inProximity.length)
+      .normalize()
+      .multiply(MAX_ALIGN_FORCE);
 
     forces.separation
-      .divide(-boids.length)
+      .divide(-inProximity.length)
       .normalize()
       .multiply(MAX_AVOID_FORCE);
 
     forces.cohesion
-      .divide(boids.length)
+      .divide(inProximity.length)
       .subtract(boid.position)
       .normalize()
       .multiply(MAX_COHESION_FORCE);
@@ -217,15 +229,13 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
       const distance = boid.position.getDistanceTo(mostThreatening.position);
       const dynamicAvoidanceForceMultiplier =
         (mostThreatening.radius * 0.9) / distance;
-      // distance < mostThreatening.radius * 0.9 ? 2 : 1;
 
-      forces.avoidance
-        .normalize()
-        .multiply(
-          MAX_AVOID_FORCE * dynamicAvoidanceForceMultiplier < 0.9
-            ? 0.9
-            : dynamicAvoidanceForceMultiplier
-        );
+      const multiplier =
+        MAX_AVOID_FORCE * dynamicAvoidanceForceMultiplier < 0.9
+          ? 0.9
+          : dynamicAvoidanceForceMultiplier;
+
+      forces.avoidance.normalize().multiply(multiplier);
     }
 
     if (types.includes("edge-avoidance")) {
