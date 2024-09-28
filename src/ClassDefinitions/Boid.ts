@@ -2,14 +2,16 @@ import Obstacle from "./Obstacle";
 import Vector2 from "./Vector2";
 
 export default class Boid extends Obstacle {
+  id: number;
   private _velocity: Vector2;
 
   public get velocity(): Vector2 {
     return this._velocity;
   }
 
-  constructor(position: Vector2, forward: Vector2) {
+  constructor(id: number, position: Vector2, forward: Vector2) {
     super(position, 0.5);
+    this.id = id;
     this.position = position.copy();
     this._velocity = forward.copy().normalize();
   }

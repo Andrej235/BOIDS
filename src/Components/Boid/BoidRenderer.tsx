@@ -3,9 +3,10 @@ import Boid from "../../ClassDefinitions/Boid";
 
 type BoidRendererProps = {
   boid: Boid;
+  selected: boolean;
 };
 
-export default function BoidRenderer({ boid }: BoidRendererProps) {
+export default function BoidRenderer({ boid, selected }: BoidRendererProps) {
   const { scene } = useGLTF("/3DModels/boid.glb");
 
   return (
@@ -15,7 +16,7 @@ export default function BoidRenderer({ boid }: BoidRendererProps) {
       scale={[0.1, 0.1, 0.1]}
       geometry={(scene.children[0] as any).geometry}
     >
-      <meshBasicMaterial color={"#fff"} />
+      <meshBasicMaterial color={selected ? "#3f3" : "#fff"} />
     </mesh>
   );
 }

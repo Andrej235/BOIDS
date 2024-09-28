@@ -11,6 +11,7 @@ function App() {
     for (let i: number = 0; i < 50; i++) {
       boids.push(
         new Boid(
+          i,
           new Vector2(Math.random() * 25, Math.random() * 15),
           new Vector2(Math.random() - 0.5, Math.random() - 0.5)
         )

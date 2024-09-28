@@ -73,6 +73,12 @@ export default class Vector2 {
     return this;
   }
 
+  floor() {
+    this.x = Math.floor(this.x);
+    this.y = Math.floor(this.y);
+    return this;
+  }
+
   divideByVector(other: Vector2) {
     this.x /= other.x;
     this.y /= other.y;
