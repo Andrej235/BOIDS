@@ -24,13 +24,15 @@ export default class SpatialHash {
   construct(boids: Boid[]): SpatialHash {
     this.buckets = new Map();
 
-    boids.forEach((boid) => {
+    for (let i = 0; i < boids.length; i++) {
+      const boid = boids[i];
+
       const hash = this.hash(boid.position.x, boid.position.y);
       const bucket = this.buckets.get(hash);
 
       if (bucket) bucket.push(boid);
       else this.buckets.set(hash, [boid]);
-    });
+    }
 
     return this;
   }
@@ -51,12 +53,13 @@ export default class SpatialHash {
       i <= middleHash + this.size.x;
       i += this.size.x
     ) {
-      bucket = bucket?.concat(this.buckets.get(i - 1) ?? []);
-      bucket = bucket?.concat(this.buckets.get(i) ?? []);
-      bucket = bucket?.concat(this.buckets.get(i + 1) ?? []);
+      bucket = bucket.concat(this.buckets.get(i - 1) ?? []);
+      bucket = bucket.concat(this.buckets.get(i) ?? []);
+      bucket = bucket.concat(this.buckets.get(i + 1) ?? []);
     }
 
-    return Array.from(new Set(bucket));
+    return bucket;
+    // return [...new Set(bucket)];
   }
 
   getBucket(position: Vector2) {

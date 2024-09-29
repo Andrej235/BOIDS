@@ -74,9 +74,10 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
     spatialHash.current = spatialHash.current.construct(boids);
 
     setBoids((boids) => {
-      boids.forEach((boid) => {
-        const velocity = boid.velocity;
+      for (let i = 0; i < boids.length; i++) {
+        const boid = boids[i];
 
+        const velocity = boid.velocity;
         const steering = new Vector2(0, 0);
         const forces = getForces(boid);
 
@@ -95,7 +96,7 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
         boid.position.add(velocity);
 
         validatePosition(boid);
-      });
+      }
 
       return boids.slice();
     });
@@ -141,13 +142,6 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
     const inProximity = spatialHash.current.getInProximity(boid.position);
     if (inProximity.length < 2) return {} as any;
 
-    for (const current of inProximity) {
-      if (current === boid) continue;
-
-      forces.alignment.add(current.velocity);
-      forces.cohesion.add(current.position);
-    }
-
     const futureVelocity = boid.velocity.copy().multiply(MAX_SEE_AHEAD);
     const ahead = boid.position.copy().add(futureVelocity);
     const ahead2 = boid.position.copy().add(futureVelocity.multiply(0.5));
@@ -155,8 +149,12 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
     let mostThreatening: Obstacle | null = null;
     let mostThreateningDistance = 0;
 
-    for (const current of inProximity) {
+    for (let i = 0; i < inProximity.length; i++) {
+      const current = inProximity[i];
       if (current === boid) continue;
+
+      forces.alignment.add(current.velocity);
+      forces.cohesion.add(current.position);
 
       const distance = current.position.getDistanceTo(boid.position);
 
