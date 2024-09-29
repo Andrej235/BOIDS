@@ -18,7 +18,7 @@ type BoidControllerProps = {
 type ForceType =
   | "alignment"
   | "cohesion"
-  | "separation"
+  // | "separation"
   | "avoidance"
   | "edge-avoidance";
 
@@ -63,11 +63,13 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
   const viewportSize = new Vector2(viewportWidth, viewportHeight);
   const min = new Vector2(-viewportWidth / 2, -viewportHeight / 2);
   const max = new Vector2(viewportWidth / 2, viewportHeight / 2);
-  const cellSize = 2;
+  const cellSize = 1;
 
   const MAX_STEERING_FORCE = 0.005;
   const MAX_SPEED = 5;
 
+  //TODO: Limit force calculations to a max of 'n' neighbors (from spatial hash)
+  //TODO: Try reconstructing the spatial hash on every 'n' frames to improve performance, this could affect precision though
   useFrame(({}, delta) => {
     spatialHash.current = spatialHash.current.construct(boids);
 
@@ -76,17 +78,9 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
         const velocity = boid.velocity;
 
         const steering = new Vector2(0, 0);
-        const forces = getForces(
-          boid,
-          "alignment",
-          "cohesion",
-          "separation",
-          "edge-avoidance",
-          "avoidance"
-        );
+        const forces = getForces(boid);
 
         steering.add(forces.avoidance);
-        // steering.add(forces.separation);
         steering.add(forces.alignment);
         steering.add(forces.cohesion);
         steering.add(forces["edge-avoidance"]);
@@ -128,40 +122,29 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
     [P in T[number]]: Vector2;
   };
 
-  const MAX_AVOID_DISTANCE = 1.5;
-  const MAX_AVOID_FORCE = 0.00275;
-  const MAX_ALIGN_DISTANCE = 1;
+  const MAX_AVOID_FORCE = 0.003;
   const MAX_ALIGN_FORCE = 0.003;
-  const MAX_SEE_AHEAD = 8;
-  const MAX_COHESION_DISTANCE = 1;
+  const MAX_SEE_AHEAD = 4;
   const MAX_COHESION_FORCE = 0.001;
 
-  function getForces<T extends ForceType[]>(
-    boid: Boid,
-    ...types: T
-  ): ForceTypeObject<T> {
-    if (boids.length < 2) return {} as any;
-
-    const forces: {
-      [P in ForceType]: Vector2;
-    } = {
+  function getForces(boid: Boid): ForceTypeObject<ForceType[]> {
+    const forces: ForceTypeObject<ForceType[]> = {
       avoidance: new Vector2(0, 0),
-      separation: new Vector2(0, 0),
+      // separation: new Vector2(0, 0),
       alignment: new Vector2(0, 0),
       cohesion: new Vector2(0, 0),
       "edge-avoidance": new Vector2(0, 0),
     };
 
-    const velocity = boid.velocity;
+    if (boids.length < 2) return forces;
 
+    const velocity = boid.velocity;
     const ahead = boid.position
       .copy()
       .add(velocity.copy().multiply(MAX_SEE_AHEAD));
-
     const ahead2 = boid.position
       .copy()
       .add(velocity.copy().multiply(MAX_SEE_AHEAD / 2));
-
     let mostThreatening: Obstacle | null = null;
 
     const inProximity = spatialHash.current.getInProximity(boid.position);
@@ -170,16 +153,8 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
     for (const current of inProximity) {
       if (current === boid) continue;
 
-      const distance = current.position.getDistanceTo(boid.position);
-
-      if (types.includes("alignment") && distance < MAX_ALIGN_DISTANCE)
-        forces.alignment.add(current.velocity);
-
-      if (types.includes("separation") && distance < MAX_AVOID_DISTANCE)
-        forces.separation.add(current.position.copy().subtract(boid.position));
-
-      if (types.includes("cohesion") && distance < MAX_COHESION_DISTANCE)
-        forces.cohesion.add(current.position);
+      forces.alignment.add(current.velocity);
+      forces.cohesion.add(current.position);
     }
 
     for (const current of spatialHash.current.getBucket(boid.position) ?? []) {
@@ -187,32 +162,25 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
 
       const distance = current.position.getDistanceTo(boid.position);
 
-      if (types.includes("avoidance")) {
-        const collision = lineIntersectsCircle(
-          ahead,
-          ahead2,
-          boid.position,
-          current
-        );
+      const collision = lineIntersectsCircle(
+        ahead,
+        ahead2,
+        boid.position,
+        current
+      );
 
-        if (
-          collision &&
-          (!mostThreatening ||
-            distance < boid.position.getDistanceTo(mostThreatening.position))
-        )
-          mostThreatening = current;
-      }
+      if (
+        collision &&
+        (!mostThreatening ||
+          distance < boid.position.getDistanceTo(mostThreatening.position))
+      )
+        mostThreatening = current;
     }
 
     forces.alignment
       .divide(inProximity.length)
       .normalize()
       .multiply(MAX_ALIGN_FORCE);
-
-    forces.separation
-      .divide(-inProximity.length)
-      .normalize()
-      .multiply(MAX_AVOID_FORCE);
 
     forces.cohesion
       .divide(inProximity.length)
@@ -238,10 +206,7 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
       forces.avoidance.normalize().multiply(multiplier);
     }
 
-    if (types.includes("edge-avoidance")) {
-      forces["edge-avoidance"] = getEdgeAvoidanceForce(boid, viewportSize);
-    }
-
+    forces["edge-avoidance"] = getEdgeAvoidanceForce(boid, viewportSize);
     return forces;
   }
 
