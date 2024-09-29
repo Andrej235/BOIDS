@@ -138,15 +138,6 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
 
     if (boids.length < 2) return forces;
 
-    const velocity = boid.velocity;
-    const ahead = boid.position
-      .copy()
-      .add(velocity.copy().multiply(MAX_SEE_AHEAD));
-    const ahead2 = boid.position
-      .copy()
-      .add(velocity.copy().multiply(MAX_SEE_AHEAD / 2));
-    let mostThreatening: Obstacle | null = null;
-
     const inProximity = spatialHash.current.getInProximity(boid.position);
     if (inProximity.length < 2) return {} as any;
 
@@ -157,7 +148,14 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
       forces.cohesion.add(current.position);
     }
 
-    for (const current of spatialHash.current.getBucket(boid.position) ?? []) {
+    const futureVelocity = boid.velocity.copy().multiply(MAX_SEE_AHEAD);
+    const ahead = boid.position.copy().add(futureVelocity);
+    const ahead2 = boid.position.copy().add(futureVelocity.multiply(0.5));
+
+    let mostThreatening: Obstacle | null = null;
+    let mostThreateningDistance = 0;
+
+    for (const current of inProximity) {
       if (current === boid) continue;
 
       const distance = current.position.getDistanceTo(boid.position);
@@ -171,10 +169,11 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
 
       if (
         collision &&
-        (!mostThreatening ||
-          distance < boid.position.getDistanceTo(mostThreatening.position))
-      )
+        (!mostThreatening || distance < mostThreateningDistance)
+      ) {
         mostThreatening = current;
+        mostThreateningDistance = distance;
+      }
     }
 
     forces.alignment
@@ -208,19 +207,19 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
 
     forces["edge-avoidance"] = getEdgeAvoidanceForce(boid, viewportSize);
     return forces;
-  }
 
-  function lineIntersectsCircle(
-    ahead: Vector2,
-    ahead2: Vector2,
-    ahead3: Vector2,
-    obstacle: Obstacle
-  ): boolean {
-    return (
-      obstacle.position.getDistanceTo(ahead) < obstacle.radius ||
-      obstacle.position.getDistanceTo(ahead2) < obstacle.radius ||
-      obstacle.position.getDistanceTo(ahead3) < obstacle.radius
-    );
+    function lineIntersectsCircle(
+      ahead: Vector2,
+      ahead2: Vector2,
+      ahead3: Vector2,
+      obstacle: Obstacle
+    ): boolean {
+      return (
+        obstacle.position.getDistanceTo(ahead) < obstacle.radius ||
+        obstacle.position.getDistanceTo(ahead2) < obstacle.radius ||
+        obstacle.position.getDistanceTo(ahead3) < obstacle.radius
+      );
+    }
   }
 
   function validatePosition(boid: Boid) {
