@@ -1,15 +1,15 @@
 import Obstacle from "./Obstacle";
-import Vector2 from "./Vector2";
+import Vector3 from "./Vector3";
 
 export default class Boid extends Obstacle {
   id: number;
-  private _velocity: Vector2;
+  private _velocity: Vector3;
 
-  public get velocity(): Vector2 {
+  public get velocity(): Vector3 {
     return this._velocity;
   }
 
-  constructor(id: number, position: Vector2, forward: Vector2) {
+  constructor(id: number, position: Vector3, forward: Vector3) {
     super(position, 0.5);
     this.id = id;
     this.position = position.copy();

@@ -1,5 +1,5 @@
 import Boid from "../../ClassDefinitions/Boid";
-import Vector2 from "../../ClassDefinitions/Vector2";
+import Vector3 from "../../ClassDefinitions/Vector3";
 
 const MAX_SEE_AHEAD = 8;
 
@@ -8,9 +8,9 @@ const MAX_EDGE_FORCE = 21;
 
 export default function getEdgeAvoidanceForce(
   boid: Boid,
-  viewportSize: Vector2
-): Vector2 {
-  const steering = new Vector2(0, 0);
+  viewportSize: Vector3
+): Vector3 {
+  const steering = new Vector3(0, 0);
 
   const velocity = boid.velocity;
   const ahead = boid.position

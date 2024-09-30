@@ -1,6 +1,6 @@
 import Boid from "../../ClassDefinitions/Boid";
 import Obstacle from "../../ClassDefinitions/Obstacle";
-import Vector2 from "../../ClassDefinitions/Vector2";
+import Vector3 from "../../ClassDefinitions/Vector3";
 
 const MAX_SEE_AHEAD = 8;
 const MAX_AVOID_FORCE = 0.00275;
@@ -8,7 +8,7 @@ const MAX_AVOID_FORCE = 0.00275;
 export default function getAvoidanceForce(
   boid: Boid,
   obstacles: Obstacle[]
-): Vector2 | null {
+): Vector3 | null {
   const velocity = boid.velocity;
 
   const ahead = boid.position
@@ -21,10 +21,10 @@ export default function getAvoidanceForce(
 
   const mostThreatening = findMostThreateningObstacle(boid, ahead, ahead2);
 
-  let avoidance: Vector2 | null = null;
+  let avoidance: Vector3 | null = null;
 
   if (mostThreatening) {
-    avoidance = new Vector2(
+    avoidance = new Vector3(
       ahead.x - mostThreatening.position.x,
       ahead.y - mostThreatening.position.y
     );
@@ -46,9 +46,9 @@ export default function getAvoidanceForce(
   return avoidance;
 
   function lineIntersectsCircle(
-    ahead: Vector2,
-    ahead2: Vector2,
-    ahead3: Vector2,
+    ahead: Vector3,
+    ahead2: Vector3,
+    ahead3: Vector3,
     obstacle: Obstacle
   ): boolean {
     return (
@@ -60,8 +60,8 @@ export default function getAvoidanceForce(
 
   function findMostThreateningObstacle(
     boid: Boid,
-    ahead: Vector2,
-    ahead2: Vector2
+    ahead: Vector3,
+    ahead2: Vector3
   ): Obstacle | null {
     let mostThreatening: Obstacle | null = null;
 

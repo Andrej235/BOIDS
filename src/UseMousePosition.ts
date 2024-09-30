@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import Vector2 from "./ClassDefinitions/Vector2";
+import Vector3 from "./ClassDefinitions/Vector3";
 
 const useMousePosition = () => {
-  const [mousePosition, setMousePosition] = useState<Vector2>(
-    new Vector2(0, 0)
+  const [mousePosition, setMousePosition] = useState<Vector3>(
+    new Vector3(0, 0)
   );
 
   useEffect(() => {
     const updateMousePosition = (ev: MouseEvent) => {
       setMousePosition(
-        new Vector2(ev.clientX, window.innerHeight - ev.clientY)
+        new Vector3(ev.clientX, window.innerHeight - ev.clientY)
       );
     };
 

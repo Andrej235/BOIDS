@@ -1,16 +1,16 @@
 import Boid from "./Boid";
-import Vector2 from "./Vector2";
+import Vector3 from "./Vector3";
 
 export default class SpatialHash {
   buckets: Map<number, Boid[]>;
   // private min: Vector2;
-  private max: Vector2;
+  private max: Vector3;
   private cellSize: number;
-  private size: Vector2;
+  private size: Vector3;
   // private numberOfBuckets: number;
   private conversionFactor: number;
 
-  constructor(min: Vector2, max: Vector2, cellSize: number) {
+  constructor(min: Vector3, max: Vector3, cellSize: number) {
     this.buckets = new Map();
 
     // this.min = min;
@@ -44,7 +44,7 @@ export default class SpatialHash {
     );
   }
 
-  getInProximity(position: Vector2): Boid[] {
+  getInProximity(position: Vector3): Boid[] {
     const middleHash = this.hash(position.x, position.y);
     let bucket: Boid[] = [];
 
@@ -62,7 +62,7 @@ export default class SpatialHash {
     // return [...new Set(bucket)];
   }
 
-  getBucket(position: Vector2) {
+  getBucket(position: Vector3) {
     return this.buckets.get(this.hash(position.x, position.y));
   }
 }

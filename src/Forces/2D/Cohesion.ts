@@ -1,13 +1,13 @@
 import Boid from "../../ClassDefinitions/Boid";
-import Vector2 from "../../ClassDefinitions/Vector2";
+import Vector3 from "../../ClassDefinitions/Vector3";
 
 const MAX_COHESION_DISTANCE = 1;
 const MAX_COHESION_FORCE = 0.001;
 
-export default function getCohesionForce(boid: Boid, boids: Boid[]): Vector2 {
-  if (boids.length < 2) return new Vector2(0, 0);
+export default function getCohesionForce(boid: Boid, boids: Boid[]): Vector3 {
+  if (boids.length < 2) return new Vector3(0, 0);
 
-  const steering = new Vector2(0, 0);
+  const steering = new Vector3(0, 0);
 
   boids.forEach((current) => {
     if (current === boid) return;

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import "./App.scss";
 import Boid from "./ClassDefinitions/Boid";
-import Vector2 from "./ClassDefinitions/Vector2";
+import Vector3 from "./ClassDefinitions/Vector3";
 import BoidController from "./Components/BoidController/BoidController";
 
 function App() {
@@ -12,8 +12,8 @@ function App() {
       boids.push(
         new Boid(
           i,
-          new Vector2(Math.random() * 25, Math.random() * 15),
-          new Vector2(Math.random() - 0.5, Math.random() - 0.5)
+          new Vector3(Math.random() * 25, Math.random() * 15),
+          new Vector3(Math.random() - 0.5, Math.random() - 0.5)
         )
       );
     }
