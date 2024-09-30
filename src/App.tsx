@@ -12,8 +12,16 @@ function App() {
       boids.push(
         new Boid(
           i,
-          new Vector3(Math.random() * 25, Math.random() * 15),
-          new Vector3(Math.random() - 0.5, Math.random() - 0.5)
+          new Vector3(
+            Math.random() * 25,
+            Math.random() * 15,
+            Math.random() * 25
+          ),
+          new Vector3(
+            Math.random() - 0.5,
+            Math.random() - 0.5,
+            Math.random() - 0.5
+          )
         )
       );
     }

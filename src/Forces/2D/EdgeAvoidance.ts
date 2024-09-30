@@ -27,5 +27,9 @@ export default function getEdgeAvoidanceForce(
   else if (ahead.y > viewportSize.y / 2 - MAX_EDGE_DISTANCE)
     steering.y = -viewportSize.y / 2;
 
+  if (ahead.z < 0 + MAX_EDGE_DISTANCE) steering.z = viewportSize.z;
+  else if (ahead.z > viewportSize.z - MAX_EDGE_DISTANCE)
+    steering.z = -viewportSize.z;
+
   return steering.normalize().multiply(MAX_EDGE_FORCE);
 }

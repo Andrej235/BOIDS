@@ -61,7 +61,7 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
     viewport: { width: viewportWidth, height: viewportHeight },
   } = useThree();
 
-  const viewportSize = new Vector3(viewportWidth, viewportHeight);
+  const viewportSize = new Vector3(viewportWidth, viewportHeight, 25);
   const min = new Vector3(-viewportWidth / 2, -viewportHeight / 2);
   const max = new Vector3(viewportWidth / 2, viewportHeight / 2);
   const cellSize = 1;
@@ -222,15 +222,18 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
   }
 
   function validatePosition(boid: Boid) {
-    if (boid.position.x < -viewportWidth / 2)
-      boid.position.x = viewportWidth / 2;
-    else if (boid.position.x > viewportWidth / 2)
-      boid.position.x = -viewportWidth / 2;
+    if (boid.position.x < -viewportSize.x / 2)
+      boid.position.x = viewportSize.x / 2;
+    else if (boid.position.x > viewportSize.x / 2)
+      boid.position.x = -viewportSize.x / 2;
 
-    if (boid.position.y < -viewportHeight / 2)
-      boid.position.y = viewportHeight / 2;
-    else if (boid.position.y > viewportHeight / 2)
-      boid.position.y = -viewportHeight / 2;
+    if (boid.position.y < -viewportSize.y / 2)
+      boid.position.y = viewportSize.y / 2;
+    else if (boid.position.y > viewportSize.y / 2)
+      boid.position.y = -viewportSize.y / 2;
+
+    if (boid.position.z < 0) boid.position.z = viewportSize.z;
+    else if (boid.position.z > viewportSize.z) boid.position.z = 0;
   }
 
   return (

@@ -12,7 +12,7 @@ export default function BoidRenderer({ boid, selected }: BoidRendererProps) {
   return (
     <mesh
       rotation={[0, 0, boid.rotation]}
-      position={[boid.position.x, boid.position.y, 0]}
+      position={[boid.position.x, boid.position.y, -boid.position.z]}
       scale={[0.1, 0.1, 0.1]}
       geometry={(scene.children[0] as any).geometry}
     >
