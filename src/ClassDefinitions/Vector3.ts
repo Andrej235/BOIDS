@@ -98,7 +98,7 @@ export default class Vector3 {
   }
 
   normalize() {
-    const length = Math.sqrt(this.x * this.x + this.y * this.y);
+    const length = this.getMagnitude();
     this.x /= length ? length : 1;
     this.y /= length ? length : 1;
     this.z /= length ? length : 1;

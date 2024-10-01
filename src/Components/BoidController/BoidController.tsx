@@ -16,12 +16,7 @@ type BoidControllerProps = {
   testSteering?: Vector3;
 };
 
-type ForceType =
-  | "alignment"
-  | "cohesion"
-  // | "separation"
-  | "avoidance"
-  | "edge-avoidance";
+type ForceType = "alignment" | "cohesion" | "avoidance" | "edge-avoidance";
 
 export default function BoidController({
   initialBoids,
@@ -74,6 +69,8 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
   useFrame(({}, delta) => {
     spatialHash.current = spatialHash.current.construct(boids);
 
+    if (delta <= 0) return;
+
     setBoids((boids) => {
       for (let i = 0; i < boids.length; i++) {
         const boid = boids[i];
@@ -82,9 +79,9 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
         const steering = new Vector3(0, 0);
         const forces = getForces(boid);
 
-        steering.add(forces.avoidance);
-        steering.add(forces.alignment);
-        steering.add(forces.cohesion);
+        // steering.add(forces.avoidance);
+        // steering.add(forces.alignment);
+        // steering.add(forces.cohesion);
         steering.add(forces["edge-avoidance"]);
 
         steering.truncate(MAX_STEERING_FORCE);
@@ -94,6 +91,7 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
           .add(steering)
           .normalize()
           .truncate(MAX_SPEED * delta);
+
         boid.position.add(velocity);
 
         validatePosition(boid);
@@ -113,7 +111,7 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
 
       const inProximity = spatialHash.current.getInProximity(mousePos);
       setSelectedBoids(inProximity);
-      console.log(inProximity);
+      // console.log(inProximity);
     }
 
     document.addEventListener("mousedown", handleClick);
@@ -132,7 +130,6 @@ function InnerBoidController({ initialBoids }: BoidControllerProps) {
   function getForces(boid: Boid): ForceTypeObject<ForceType[]> {
     const forces: ForceTypeObject<ForceType[]> = {
       avoidance: new Vector3(0, 0),
-      // separation: new Vector2(0, 0),
       alignment: new Vector3(0, 0),
       cohesion: new Vector3(0, 0),
       "edge-avoidance": new Vector3(0, 0),
